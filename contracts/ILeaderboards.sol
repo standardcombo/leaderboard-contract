@@ -13,7 +13,7 @@ interface ILeaderboards
         Daily
     }
     function createLeaderboard() external returns(uint256);
-    function getLeaderboard(uint256 leaderboardId) external view returns(string[] memory, uint256[] memory);
+    function getLeaderboard(uint256 leaderboardId, uint256 pageIndex) external view returns(string[] memory, uint256[] memory);
     function clearLeaderboard(uint256 leaderboardId) external;
     function getResetPeriod(uint256 leaderboardId) external view returns(ResetPeriod);
     function setResetPeriod(uint256 leaderboardId, ResetPeriod resetPeriod) external;

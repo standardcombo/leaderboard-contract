@@ -14,15 +14,20 @@ contract Leaderboards
     }
 
     uint8 constant MAX_NICKNAME_LENGTH = 16;
+    uint256 constant PAGE_LENGTH = 1000;
 
+    struct Entry
+    {
+        bytes32 player;
+        uint256 score;
+        string nickname;
+    }
     struct LeaderboardData
     {
         ResetPeriod resetPeriod;
         bool canScoresDecrease;
         uint256 maxSize;
-        bytes32[] players;
-        uint256[] scores;
-        string[] nicknames;
+        Entry[] entries;
     }
 
     LeaderboardData[] leaderboards;
@@ -44,7 +49,7 @@ contract Leaderboards
 
         LeaderboardData memory newBoard;
         newBoard.maxSize = 1000000;
-        leaderboards.push(newBoard);
+        leaderboards.push(newBoard); // Throws UnimplementedFeatureError: Copying of type struct Leaderboards.Entry memory[] memory to storage not yet supported.
 
         leaderboardOwners[id] = msg.sender;
 
@@ -54,10 +59,25 @@ contract Leaderboards
     /**
      * 
      */
-    function getLeaderboard(uint256 leaderboardId) public view returns(string[] memory, uint256[] memory)
+    function getLeaderboard(uint256 leaderboardId, uint256 pageIndex) public view 
+        returns(string[PAGE_LENGTH] memory, uint256[PAGE_LENGTH] memory)
     {
+        string[PAGE_LENGTH] memory nicknames;
+        uint256[PAGE_LENGTH] memory scores;
+        
         LeaderboardData memory board = leaderboards[leaderboardId];
-        return (board.nicknames, board.scores);
+
+        uint256 i = 0;
+        uint256 k = pageIndex * PAGE_LENGTH;
+
+        while (i < PAGE_LENGTH && k < board.entries.length)
+        {
+            nicknames[i] = board.entries[k].nickname;
+            scores[i] = board.entries[k].score;
+            i++;
+            k++;
+        }
+        return (nicknames, scores);
     }
 
     /**
@@ -128,13 +148,11 @@ contract Leaderboards
         LeaderboardData storage board = leaderboards[leaderboardId];
         board.maxSize = _maxSize;
 
-        while (board.scores.length > _maxSize)
+        while (board.entries.length > _maxSize)
         {
-            bytes32 lastPlayerId = board.players[board.scores.length - 1];
+            bytes32 lastPlayerId = board.entries[board.entries.length - 1].player;
             playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
-            board.players.pop();
-            board.scores.pop();
-            board.nicknames.pop();
+            board.entries.pop();
         }
     }
 
@@ -149,9 +167,9 @@ contract Leaderboards
         {
             playerIndex--;
             LeaderboardData memory board = leaderboards[leaderboardId];
-            if (playerIndex < board.scores.length)
+            if (playerIndex < board.entries.length)
             {
-                return board.scores[playerIndex];
+                return board.entries[playerIndex].score;
             }
         }
         return 0;
@@ -164,14 +182,14 @@ contract Leaderboards
     {
         LeaderboardData storage board = leaderboards[leaderboardId];
 
-        for (uint256 i = 0; i < board.scores.length; i++)
+        for (uint256 i = 0; i < board.entries.length; i++)
         {
-            if (newScore >= board.scores[i])
+            if (newScore >= board.entries[i].score)
             {
                 return i;
             }
         }
-        return board.scores.length;
+        return board.entries.length;
     }
 
     /**
@@ -192,12 +210,11 @@ contract Leaderboards
         }
 
         // The leaderboard is empty, receiving its first score
-        if (board.scores.length == 0)
+        if (board.entries.length == 0)
         {
             playerIndexOneBased[leaderboardId][playerId] = 1;
-            board.players.push(playerId);
-            board.scores.push(newScore);
-            board.nicknames.push(_getNickname(playerId));
+            Entry memory entry = Entry(playerId, newScore, _getNickname(playerId));
+            board.entries.push(entry);
 
             return;
         }
@@ -215,24 +232,23 @@ contract Leaderboards
         if (hasPreviousScore)
         {
             // Same score. No change
-            if (newScore == board.scores[playerIndex])
+            if (newScore == board.entries[playerIndex].score)
             {
                 return;
             }
             // The new score is better than this player's old score. Search and insert
-            if (newScore > board.scores[playerIndex])
+            if (newScore > board.entries[playerIndex].score)
             {
                 while (playerIndex > 0)
                 {
-                    if (newScore < board.scores[playerIndex - 1])
+                    if (newScore < board.entries[playerIndex - 1].score)
                     {
                         break;
                     }
                     // Move other scores down by 1
-                    playerIndexOneBased[leaderboardId][board.players[playerIndex - 1]]++;
-                    board.players[playerIndex] = board.players[playerIndex - 1];
-                    board.scores[playerIndex] = board.scores[playerIndex - 1];
-                    board.nicknames[playerIndex] = board.nicknames[playerIndex - 1];
+                    bytes32 _pid = board.entries[playerIndex - 1].player;
+                    playerIndexOneBased[leaderboardId][_pid]++;
+                    board.entries[playerIndex] = board.entries[playerIndex - 1];
 
                     playerIndex--;
                 }
@@ -245,33 +261,31 @@ contract Leaderboards
                     return;
                 }
                 // Search
-                while (playerIndex < board.scores.length - 1)
+                while (playerIndex < board.entries.length - 1)
                 {
                     uint256 i = playerIndex + 1;
-                    if (newScore >= board.scores[i])
+                    if (newScore >= board.entries[i].score)
                     {
                         break;
                     }
 
                     // Move other scores up by 1
-                    playerIndexOneBased[leaderboardId][board.players[i]]--;
-                    board.players[playerIndex] = board.players[i];
-                    board.scores[playerIndex] = board.scores[i];
-                    board.nicknames[playerIndex] = board.nicknames[i];
+                    bytes32 _pid = board.entries[i].player;
+                    playerIndexOneBased[leaderboardId][_pid]--;
+                    board.entries[playerIndex] = board.entries[i];
 
                     playerIndex++;
                 }
             }
         }
         // New player, with worst score of all
-        else if (newScore < board.scores[board.scores.length - 1])
+        else if (newScore < board.entries[board.entries.length - 1].score)
         {
-            if (board.scores.length < board.maxSize)
+            if (board.entries.length < board.maxSize)
             {
-                board.players.push(playerId);
-                board.scores.push(newScore);
-                board.nicknames.push(_getNickname(playerId));
-                playerIndexOneBased[leaderboardId][playerId] = board.scores.length;
+                Entry memory entry = Entry(playerId, newScore, _getNickname(playerId));
+                board.entries.push(entry);
+                playerIndexOneBased[leaderboardId][playerId] = board.entries.length;
             }
             return;
         }
@@ -279,30 +293,28 @@ contract Leaderboards
         else
         {
             playerIndex = 0;
-            for ( ; playerIndex < board.scores.length; playerIndex++)
+            for ( ; playerIndex < board.entries.length; playerIndex++)
             {
                 // Search for the index to insert at
-                if (newScore >= board.scores[playerIndex])
+                if (newScore >= board.entries[playerIndex].score)
                 {
                     // Adjust the score at the bottom of the leaderboard
-                    uint256 i = board.scores.length - 1;
-                    if (board.scores.length < board.maxSize)
+                    uint256 i = board.entries.length - 1;
+                    bytes32 _pid = board.entries[i].player;
+                    if (board.entries.length < board.maxSize)
                     {
-                        playerIndexOneBased[leaderboardId][board.players[i]]++;
-                        board.players.push(board.players[i]);
-                        board.scores.push(board.scores[i]);
-                        board.nicknames.push(board.nicknames[i]);
+                        playerIndexOneBased[leaderboardId][_pid]++;
+                        board.entries.push(board.entries[i]);
                     }
                     else {
-                        playerIndexOneBased[leaderboardId][board.players[i]] = 0;
+                        playerIndexOneBased[leaderboardId][_pid] = 0;
                     }
                     // Move other scores down by 1
                     while (i > playerIndex)
                     {
-                        playerIndexOneBased[leaderboardId][board.players[i - 1]]++;
-                        board.players[i] = board.players[i - 1];
-                        board.scores[i] = board.scores[i - 1];
-                        board.nicknames[i] = board.nicknames[i - 1];
+                        _pid = board.entries[i - 1].player;
+                        playerIndexOneBased[leaderboardId][_pid]++;
+                        board.entries[i] = board.entries[i - 1];
                         i--;
                     }
                     break;
@@ -311,9 +323,9 @@ contract Leaderboards
         }
         // Emplace
         playerIndexOneBased[leaderboardId][playerId] = playerIndex + 1;
-        board.players[playerIndex] = playerId;
-        board.scores[playerIndex] = newScore;
-        board.nicknames[playerIndex] = _getNickname(playerId);
+        board.entries[playerIndex].player = playerId;
+        board.entries[playerIndex].score = newScore;
+        board.entries[playerIndex].nickname = _getNickname(playerId);
     }
 
     /**
@@ -344,7 +356,7 @@ contract Leaderboards
             if (playerIndex > 0)
             {
                 LeaderboardData storage board = leaderboards[id];
-                board.nicknames[playerIndex] = _nickname;
+                board.entries[playerIndex].nickname = _nickname;
             }
         }
     }
@@ -386,13 +398,11 @@ contract Leaderboards
     {
         LeaderboardData storage board = leaderboards[leaderboardId];
 
-        while (board.scores.length > 0)
+        while (board.entries.length > 0)
         {
-            bytes32 lastPlayerId = board.players[board.scores.length - 1];
+            bytes32 lastPlayerId = board.entries[board.entries.length - 1].player;
             playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
-            board.players.pop();
-            board.scores.pop();
-            board.nicknames.pop();
+            board.entries.pop();
         }
     }
 
