@@ -15,11 +15,6 @@ contract Leaderboards
 
     uint8 constant MAX_NICKNAME_LENGTH = 16;
 
-    struct Entry
-    {
-        uint256 score;
-        string nickname;
-    }
     struct LeaderboardData
     {
         ResetPeriod resetPeriod;
@@ -34,7 +29,7 @@ contract Leaderboards
     uint256 nextLeaderboardId;
 
     mapping(uint256 => address) leaderboardOwners;
-    mapping(bytes32 => string) nicknames;
+    mapping(bytes32 => string) playerNicknames;
 
     // A value of 0 means the player does not have a score on that leaderboard
     mapping(uint256 => mapping(bytes32 => uint256)) playerIndexOneBased;
@@ -135,7 +130,8 @@ contract Leaderboards
 
         while (board.scores.length > _maxSize)
         {
-            playerIndexOneBased[leaderboardId][board.players[board.scores.length - 1]] = 0;
+            bytes32 lastPlayerId = board.players[board.scores.length - 1];
+            playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
             board.players.pop();
             board.scores.pop();
             board.nicknames.pop();
@@ -339,9 +335,9 @@ contract Leaderboards
         // Save nickname
         bytes32 playerId = _getPlayerId(msg.sender);
         _nickname = string(abi.encodePacked(_nickname, " ", _getPlayerIdAbbreviation(playerId)));
-        nicknames[playerId] = _nickname;
+        playerNicknames[playerId] = _nickname;
 
-        // Update existing entries
+        // Update existing entries for this player across all leaderboards
         for (uint256 id = 1; id < nextLeaderboardId; id++)
         {
             uint256 playerIndex = playerIndexOneBased[id][playerId];
@@ -364,9 +360,9 @@ contract Leaderboards
 
     function _getNickname(bytes32 playerId) internal view returns(string memory)
     {
-        if (bytes(nicknames[playerId]).length > 0)
+        if (bytes(playerNicknames[playerId]).length > 0)
         {
-            return nicknames[playerId];
+            return playerNicknames[playerId];
         }
         return _getPlayerIdAbbreviation(playerId);
     }
@@ -392,6 +388,9 @@ contract Leaderboards
 
         while (board.scores.length > 0)
         {
+            bytes32 lastPlayerId = board.players[board.scores.length - 1];
+            playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
+            board.players.pop();
             board.scores.pop();
             board.nicknames.pop();
         }
