@@ -397,9 +397,9 @@ contract Leaderboard
     /**
      * 
      */
-    function getNickname(address player) public view returns(string memory)
+    function getNickname() public view returns(string memory)
     {
-        bytes32 playerId = _getPlayerId(player);
+        bytes32 playerId = _getPlayerId(msg.sender);
         return _getNickname(playerId);
     }
 

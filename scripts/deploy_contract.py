@@ -143,11 +143,11 @@ def register_nickname(player_address, newNickname):
     tx.wait(1)
 
 
-def get_nickname(player_address):
+def get_nickname():
     print("Get Nickname")
     account = get_account()
     contract = Leaderboard[-1]
-    nickname = contract.getNickname(player_address, {"from": account})
+    nickname = contract.getNickname({"from": account})
     print(nickname)
     return nickname
 
