@@ -44,7 +44,7 @@ contract Leaderboard
         nextLeaderboardId++;
 
         LeaderboardData memory newBoard;
-        newBoard.maxSize = 1000000;
+        newBoard.maxSize = 100000;
         leaderboards.push(newBoard);
 
         leaderboardOwners[id] = msg.sender;
@@ -167,7 +167,7 @@ contract Leaderboard
 
         for (uint256 i = 0; i < board.scores.length; i++)
         {
-            if (newScore >= board.scores[i])
+            if (newScore <= board.scores[i])
             {
                 return i;
             }
@@ -383,11 +383,12 @@ contract Leaderboard
         playerNicknames[playerId] = _nickname;
 
         // Update existing entries for this player across all leaderboards
-        for (uint256 id = 1; id < nextLeaderboardId; id++)
+        for (uint256 id = 0; id < nextLeaderboardId; id++)
         {
             uint256 playerIndex = playerIndexOneBased[id][playerId];
             if (playerIndex > 0)
             {
+                playerIndex--;
                 LeaderboardData storage board = leaderboards[id];
                 board.nicknames[playerIndex] = _nickname;
             }
