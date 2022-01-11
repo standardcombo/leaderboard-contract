@@ -4,7 +4,7 @@ from brownie import Contract, Leaderboard
 from scripts.deploy_contract import *
 
 def test_create():
-    deploy()
+    deploy_leaderboard()
     id = create_leaderboard()
 
     assert (id == 0)

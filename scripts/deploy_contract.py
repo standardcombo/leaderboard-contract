@@ -3,10 +3,9 @@ from brownie import Leaderboard, config, network
 from scripts.util import get_account
 import time
 
-gLeaderboardId = -1
 
-
-def deploy():
+def deploy_leaderboard():
+    print("Deploying Leaderboard")
     account = get_account()
 
     networkConfig = config["networks"][network.show_active()]
@@ -23,10 +22,9 @@ def create_leaderboard():
     contract = Leaderboard[-1]
     tx = contract.createLeaderboard({"from": account})
     tx.wait(1)
-    global gLeaderboardId
-    gLeaderboardId = tx.return_value
-    print("Created with id " + str(gLeaderboardId))
-    return gLeaderboardId
+    leaderboardId = tx.return_value
+    print("Created with id " + str(leaderboardId))
+    return leaderboardId
 
 
 def get_leaderboard(_leaderboard_id):
@@ -153,7 +151,7 @@ def get_nickname():
 
 
 def main():
-    deploy()
+    deploy_leaderboard()
     _id = create_leaderboard()
     register_nickname(get_account(), "standardcombo")
     submit_score(_id, get_account(), 55)
