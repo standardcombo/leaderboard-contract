@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface ILeaderboards
+interface ILeaderboard
 {
     enum ResetPeriod
     {
@@ -21,9 +21,10 @@ interface ILeaderboards
     function setCanScoresDecrease(uint256 leaderboardId, bool canScoresDecrease) external;
     function getMaxSize(uint256 leaderboardId) external view returns(uint256);
     function setMaxSize(uint256 leaderboardId, uint256 maxSize) external;
-    function getScore(uint256 leaderboardId, address player) external view returns(uint256);
+    function getEntry(uint256 leaderboardId, address player) external view returns(string memory, uint256);
     function getPositionForScore(uint256 leaderboardId, uint256 newScore) external view returns(uint256);
     function submitScore(uint256 leaderboardId, address player, uint256 newScore) external;
+    function getResetSecondsRemaining(uint256 leaderboardId) external view returns(int256);
     function registerNickname(string memory nickname) external;
     function getNickname(address player) external view returns(string memory);
 }

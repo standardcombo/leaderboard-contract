@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Leaderboards
+contract Leaderboard
 {
     enum ResetPeriod
     {
@@ -23,6 +23,7 @@ contract Leaderboards
         bytes32[] players;
         uint256[] scores;
         string[] nicknames;
+        uint256 firstTimestamp;
     }
 
     LeaderboardData[] leaderboards;
@@ -141,7 +142,7 @@ contract Leaderboards
     /**
      * 
      */
-    function getScore(uint256 leaderboardId, address player) public view returns(uint256)
+    function getEntry(uint256 leaderboardId, address player) public view returns(string memory, uint256)
     {
         bytes32 playerId = _getPlayerId(player);
         uint256 playerIndex = playerIndexOneBased[leaderboardId][playerId];
@@ -151,10 +152,10 @@ contract Leaderboards
             LeaderboardData memory board = leaderboards[leaderboardId];
             if (playerIndex < board.scores.length)
             {
-                return board.scores[playerIndex];
+                return (board.nicknames[playerIndex], board.scores[playerIndex]);
             }
         }
-        return 0;
+        return ("", 0);
     }
 
     /**
@@ -181,9 +182,6 @@ contract Leaderboards
     {
         _checkAuthority(leaderboardId);
 
-        // TODO : Check reset period and call _clearLeaderboard()
-
-        bytes32 playerId = _getPlayerId(player);
         LeaderboardData storage board = leaderboards[leaderboardId];
 
         if (board.maxSize == 0)
@@ -191,9 +189,19 @@ contract Leaderboards
             return;
         }
 
+        bytes32 playerId = _getPlayerId(player);
+        
+        // Clear leaderboard if the period has reset
+        if (_checkResetPeriod(leaderboardId))
+        {
+            _clearLeaderboard(leaderboardId);
+        }
+
         // The leaderboard is empty, receiving its first score
         if (board.scores.length == 0)
         {
+            board.firstTimestamp = block.timestamp;
+
             playerIndexOneBased[leaderboardId][playerId] = 1;
             board.players.push(playerId);
             board.scores.push(newScore);
@@ -319,6 +327,43 @@ contract Leaderboards
     /**
      * 
      */
+    function getResetSecondsRemaining(uint256 leaderboardId) public view returns(int256)
+    {
+        LeaderboardData storage board = leaderboards[leaderboardId];
+
+        if (board.resetPeriod == ResetPeriod.Eternal)
+        {
+            return 0;
+        }
+        uint256 currentTime = block.timestamp;
+        uint256 expireTime = board.firstTimestamp;
+        
+        if (board.resetPeriod == ResetPeriod.Daily)
+        {
+            expireTime += 60 * 60 * 24; // 24 hours
+        }
+        else if (board.resetPeriod == ResetPeriod.Weekly)
+        {
+            expireTime += 60 * 60 * 24 * 7; // 7 days
+        }
+        else if (board.resetPeriod == ResetPeriod.Monthly)
+        {
+            expireTime += 60 * 60 * 24 * 30; // 30 days
+        }
+        else if (board.resetPeriod == ResetPeriod.Yearly)
+        {
+            expireTime += 60 * 60 * 24 * 365; // 1 year
+        }
+        if (currentTime > expireTime)
+        {
+            return -int256(currentTime - expireTime);
+        }
+        return int256(expireTime - currentTime);
+    }
+
+    /**
+     * 
+     */
     function registerNickname(string memory _nickname) public
     {
         // Limit the size
@@ -404,5 +449,16 @@ contract Leaderboards
     function _getPlayerId(address player) internal pure returns(bytes32)
     {
         return keccak256(abi.encodePacked(player));
+    }
+
+    function _checkResetPeriod(uint256 leaderboardId) internal view returns(bool)
+    {
+        LeaderboardData storage board = leaderboards[leaderboardId];
+
+        if (board.resetPeriod == ResetPeriod.Eternal)
+        {
+            return false;
+        }
+        return getResetSecondsRemaining(leaderboardId) == 0;
     }
 }
