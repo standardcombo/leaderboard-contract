@@ -167,7 +167,7 @@ contract Leaderboard
 
         for (uint256 i = 0; i < board.scores.length; i++)
         {
-            if (newScore <= board.scores[i])
+            if (newScore >= board.scores[i])
             {
                 return i;
             }

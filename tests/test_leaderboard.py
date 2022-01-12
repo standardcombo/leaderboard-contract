@@ -40,10 +40,10 @@ def test_scores_1():
     assert (score == 7)
 
     position = get_position_for_score(id, 5)
-    assert (position == 0)
+    assert (position == 1)
 
     position = get_position_for_score(id, 10)
-    assert (position == 1)
+    assert (position == 0)
 
     set_can_scores_decrease(id, False)
     submit_score(id, get_account(), 4)
@@ -57,10 +57,68 @@ def test_scores_1():
 
 
 def test_scores_2():
-    # TODO
-    # Add scores for multiple people
-    # Add above, below, equal value, etc
-    pass
+    # Create leaderboard with 5 players
+    players = [
+        '0x44d76e63F2c5c893c4aBdA08F3518F12aEBCc7EB',
+        '0x5f75aedBe076d2Db28De18aDF4875DA6fc5eC358',
+        '0xa7F172C8254288A3305D66eefA087f7Cf82a5fD4',
+        '0x21aF8fcA9BA9090b7427985A9bbA564897AA276e',
+        '0x0cC4d3c666913cBC28a95c463843705E7ec97027'
+    ]
+    id = create_leaderboard()
+
+    submit_score(id, players[0], 1)
+    submit_score(id, players[1], 2)
+    submit_score(id, players[2], 3)
+    submit_score(id, players[3], 4)
+    submit_score(id, players[4], 5)
+
+    nicknames, scores = get_leaderboard(id)
+    assert (len(nicknames) == 5)
+
+    nickname, score = get_entry(id, players[3])
+    assert (score == 4)
+
+    position = get_position_for_score(id, 3)
+    assert (position == 2)
+
+    # Move up, give player 1 a better score
+    submit_score(id, players[1], 4)
+    nicknames2, scores = get_leaderboard(id)
+    assert (scores[0] == 5)
+    assert (scores[1] == 4)
+    assert (scores[2] == 4)
+    assert (scores[3] == 3)
+    assert (scores[4] == 1)
+    assert (nicknames2[0] == nicknames[0])
+    assert (nicknames2[1] == nicknames[3])
+    assert (nicknames2[2] == nicknames[1])
+    assert (nicknames2[3] == nicknames[2])
+    assert (nicknames2[4] == nicknames[4])
+
+    # Move down, give player 1 a lower score
+    set_can_scores_decrease(id, True)
+    submit_score(id, players[1], 0)
+    nicknames2, scores = get_leaderboard(id)
+    assert (scores[0] == 5)
+    assert (scores[1] == 4)
+    assert (scores[2] == 3)
+    assert (scores[3] == 1)
+    assert (scores[4] == 0)
+    assert (nicknames2[0] == nicknames[0])
+    assert (nicknames2[1] == nicknames[1])
+    assert (nicknames2[2] == nicknames[2])
+    assert (nicknames2[3] == nicknames[4])
+    assert (nicknames2[4] == nicknames[3])
+
+    # Decrease max entry count
+    set_max_size(id, 2)
+    nicknames2, scores = get_leaderboard(id)
+    assert (len(scores) == 2)
+    assert (scores[0] == 5)
+    assert (scores[1] == 4)
+    assert (nicknames2[0] == nicknames[0])
+    assert (nicknames2[1] == nicknames[1])
 
 
 def test_clear():
@@ -76,12 +134,19 @@ def test_clear():
 
 
 def test_nickname():
+    id = create_leaderboard()
+    submit_score(id, get_account(), 5)
+
     nickname = get_nickname()
+    nicknames, scores = get_leaderboard(id)
     assert (not nickname.startswith("standardcombo"))
+    assert (not nicknames[0].startswith("standardcombo"))
 
     register_nickname(get_account(), "standardcombo")
     nickname = get_nickname()
+    nicknames, scores = get_leaderboard(id)
     assert (nickname.startswith("standardcombo"))
+    assert (nicknames[0].startswith("standardcombo"))
 
     register_nickname(get_account(), "alice bob charli")
     nickname = get_nickname()
