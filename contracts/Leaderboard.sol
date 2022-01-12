@@ -36,7 +36,9 @@ contract Leaderboard
     mapping(uint256 => mapping(bytes32 => uint256)) playerIndexOneBased;
 
     /**
+     * @dev Creates a brand-new leaderboard. The address that calls this is set as the owner of the new leaderboard.
      * 
+     * @return uint256 Returns the ID of a new leaderboard. Use this number in future calls.
      */
     function createLeaderboard() public returns(uint256)
     {
@@ -53,7 +55,12 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns a table of players and scores, in the form of two arrays of equal size, sorted in descending order, from best to worst score.
      * 
+     * @param leaderboardId number of the leaderboard to be returned.
+     * 
+     * @return string[] Nicknames of the players. Anonymous mini-hashes are used instead, for players who have not registered their nicknames.
+     * @return unit256[] The high-scores for each of the players.
      */
     function getLeaderboard(uint256 leaderboardId) public view returns(string[] memory, uint256[] memory)
     {
@@ -62,7 +69,9 @@ contract Leaderboard
     }
 
     /**
+     * @dev Clears a specific leaderboard. Restricted to the caller of createLeaderboard().
      * 
+     * @param leaderboardId number of the leaderboard to be cleared.
      */
     function clearLeaderboard(uint256 leaderboardId) public
     {
@@ -71,7 +80,11 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns the frequency at which a specific leaderboard auto-clears. Default is 'Eternal'.
      * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * 
+     * @return ResetPeriod one of: Eternal (0), Yearly (1), Monthly (2), Weekly (3) or Daily (4).
      */
     function getResetPeriod(uint256 leaderboardId) public view returns(ResetPeriod)
     {
@@ -80,7 +93,10 @@ contract Leaderboard
     }
 
     /**
+     * @dev Set the frequency at which a specific leaderboard auto-clears.
      * 
+     * @param leaderboardId number of the leaderboard to be configured.
+     * @param _resetPeriod one of: Eternal (0), Yearly (1), Monthly (2), Weekly (3) or Daily (4).
      */
     function setResetPeriod(uint256 leaderboardId, ResetPeriod _resetPeriod) public
     {
@@ -91,7 +107,12 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns a specific leaderboard's "canScoresDecrease" property.
+     * This defines the behavior of new scores passed in by submitScore().
      * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * 
+     * @return bool Returns `true` if lower scores for existing players are saved. `false` otherwise.
      */
     function getCanScoresDecrease(uint256 leaderboardId) public view returns(bool)
     {
@@ -100,7 +121,12 @@ contract Leaderboard
     }
 
     /**
+     * @dev Changes a specific leaderboard's "canScoresDecrease" property.
+     * If set to `true`, then a new player's score always replaces their previous score.
+     * If set to `false`, then a new score is compared to that player's previous score and is only accepted if it's better.
      * 
+     * @param leaderboardId number of the leaderboard to be configured.
+     * @param _canScoresDecrease boolean value specifying the behavior of new scores that are lower than previous scores.
      */
     function setCanScoresDecrease(uint256 leaderboardId, bool _canScoresDecrease) public
     {
@@ -111,7 +137,11 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns the maximum number of entries for a given leaderboard. Default is 10,000.
      * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * 
+     * @return unit256 The maximum size of the leaderboard.
      */
     function getMaxSize(uint256 leaderboardId) public view returns(uint256)
     {
@@ -120,7 +150,10 @@ contract Leaderboard
     }
 
     /**
+     * @dev Sets the maximum number of entries on a leaderboard. Restricted to the caller of createLeaderboard().
      * 
+     * @param leaderboardId number of the leaderboard to be configured.
+     * @param _maxSize the new size limit.
      */
     function setMaxSize(uint256 leaderboardId, uint256 _maxSize) public
     {
@@ -140,7 +173,12 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns the leaderboard data about the calling player: msg.sender is used as the player to lookup.
      * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * 
+     * @return string nickname of the calling player, or empty string if they are not present on this leaderboard.
+     * @return unit256 score of the calling player, or zero if they are not present on this leaderboard.
      */
     function getEntry(uint256 leaderboardId) public view returns(string memory, uint256)
     {
@@ -161,7 +199,12 @@ contract Leaderboard
     }
 
     /**
+     * @dev Given an arbitrary score value, estimates what position on the leaderboard it would appear, if submitted.
      * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * @param newScore the hypothetical score to evaluate.
+     * 
+     * @return unit256 zero-index position on the leaderboard where the score would appear, if submitted.
      */
     function getPositionForScore(uint256 leaderboardId, uint256 newScore) public view returns(uint256)
     {
@@ -178,7 +221,11 @@ contract Leaderboard
     }
 
     /**
+     * @dev Submits a new score for a player. Restricted to the caller of createLeaderboard().
      * 
+     * @param leaderboardId number of the leaderboard to be modified.
+     * @param player address of the player who earned the score.
+     * @param newScore numeric value of the score earned.
      */
     function submitScore(uint256 leaderboardId, address player, uint256 newScore) public
     {
@@ -327,7 +374,12 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns the timestamp when the leaderboard will auto-clear, in seconds since unix epoch.
      * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * 
+     * @return unit256 the time at which reset will occur, in the form of seconds since unix epoch.
+     * Returns zero if the leaderboard's `resetPeriod` is set to `Eternal`.
      */
     function getResetTimestamp(uint256 leaderboardId) public view returns(uint256)
     {
@@ -359,7 +411,11 @@ contract Leaderboard
     }
 
     /**
+     * @dev Allows a player to register their nickname with all leaderboards created with the contract.
+     * Local only: The contract uses `msg.sender` to register the nickname.
+     * Player addresses are hashed before storage.
      * 
+     * @param _nickname the desired nickname, up to a 16 byte limit. Nicknames larger than the limit are cropped.
      */
     function registerNickname(string memory _nickname) public
     {
@@ -393,7 +449,10 @@ contract Leaderboard
     }
 
     /**
+     * @dev Returns the nickname for the caller.
+     * Local only: The contract uses `msg.sender` to lookup the nickname.
      * 
+     * @return string the nickname previously set by calls to registerNickname().
      */
     function getNickname() public view returns(string memory)
     {
