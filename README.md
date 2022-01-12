@@ -7,7 +7,7 @@ The Leaderboard contract is designed as a multi-tenant system for on-chain compo
 Features:
 - Multi-tenant: A single contract for all apps.
 - Reset periods: Daily, Weekly, Monthly, Yearly or Eternal.
-- Nickname representation controlled by the individual players.
+- Nicknames controlled by the individual players.
 - Option to ignore or accept new scores, when they are worse than previous ones.
 - Option to limit a leaderboard's size.
 - Function that predicts the position of a hypothetical new score, for certain UI cases.
