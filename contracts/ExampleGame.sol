@@ -11,7 +11,7 @@ contract ExampleGame
 
     mapping(address => uint256) private points;
 
-    constructor(address _leaderboardAddress)
+    function setup(address _leaderboardAddress) public
     {
         leaderboardAddress = _leaderboardAddress;
         leaderboardId = ILeaderboard(leaderboardAddress).createLeaderboard();
