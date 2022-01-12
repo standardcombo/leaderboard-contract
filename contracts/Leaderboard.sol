@@ -142,8 +142,10 @@ contract Leaderboard
     /**
      * 
      */
-    function getEntry(uint256 leaderboardId, address player) public view returns(string memory, uint256)
+    function getEntry(uint256 leaderboardId) public view returns(string memory, uint256)
     {
+        address player = msg.sender;
+
         bytes32 playerId = _getPlayerId(player);
         uint256 playerIndex = playerIndexOneBased[leaderboardId][playerId];
         if (playerIndex > 0)

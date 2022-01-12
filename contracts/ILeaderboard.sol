@@ -41,8 +41,8 @@ interface ILeaderboard
     // Sets the maximum number of entries on a leaderboard. Restricted to caller of createLeaderboard()
     function setMaxSize(uint256 leaderboardId, uint256 maxSize) external;
 
-    // Returns the entry for a given player (nickname, score)
-    function getEntry(uint256 leaderboardId, address player) external view returns(string memory, uint256);
+    // Returns the leaderboard entry for the caller (nickname, score). Local only: The contract uses `msg.sender` as the player to lookup.
+    function getEntry(uint256 leaderboardId) external view returns(string memory, uint256);
 
     // Given an arbitrary score value, estimates what position on the leaderboard it would appear, if submitted
     function getPositionForScore(uint256 leaderboardId, uint256 newScore) external view returns(uint256);

@@ -100,9 +100,8 @@ def set_max_size(_leaderboard_id, max_size):
 
 def get_entry(_leaderboard_id, player_address):
     print("Get Entry")
-    account = get_account()
     contract = Leaderboard[-1]
-    nickname, score = contract.getEntry(_leaderboard_id, player_address, {"from": account})
+    nickname, score = contract.getEntry(_leaderboard_id, {"from": player_address})
     print(nickname, score)
     return nickname, score
 
