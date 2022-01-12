@@ -1,4 +1,4 @@
-# leaderboard-contract
+# Leaderboard - smart contract
 
 The idea behind this project is that nobody in the multiverse should ever have to create or deploy a leaderboard-- just call this one with minimal integration.
 
