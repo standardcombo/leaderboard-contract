@@ -8,6 +8,7 @@ Features:
 - Multi-tenant: A single contract for all apps.
 - Reset periods: Daily, Weekly, Monthly, Yearly or Eternal.
 - Nicknames controlled by the individual players.
+- Each leaderboard controlled by the person or program who spawned it.
 - Option to limit a leaderboard's size.
 - Option to ignore or accept new scores, when they are worse than previous ones.
 - Function that predicts the position of a hypothetical new score, for certain UI cases.
