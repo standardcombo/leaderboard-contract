@@ -20,4 +20,5 @@ Usage:
 4. Players can call registerNickname() to change how they appear on all leaderboards.
 
 See the ExampleGame.sol for an example of on-chain usage.
+
 See function headers for details about parameters and return values.
