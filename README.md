@@ -8,8 +8,8 @@ Features:
 - Multi-tenant: A single contract for all apps.
 - Reset periods: Daily, Weekly, Monthly, Yearly or Eternal.
 - Nicknames controlled by the individual players.
-- Option to ignore or accept new scores, when they are worse than previous ones.
 - Option to limit a leaderboard's size.
+- Option to ignore or accept new scores, when they are worse than previous ones.
 - Function that predicts the position of a hypothetical new score, for certain UI cases.
 - Leaderboard data about the local player, for certain UI cases.
 
