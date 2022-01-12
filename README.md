@@ -17,6 +17,7 @@ Usage:
 1. Call createContract() to receive a new leaderboard ID.
 2. Call submitScore() to save player scores.
 3. Call getLeaderboard() to receive a sorted table of player nicknames and scores.
+4. Players can call registerNickname() to change how they appear on all leaderboards.
 
 See the ExampleGame.sol for an example of on-chain usage.
 See function headers for details about parameters and return values.
