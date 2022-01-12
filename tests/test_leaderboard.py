@@ -2,6 +2,7 @@
 from scripts.util import get_account, encode_function_data, update_proxy_contract
 from brownie import Contract, Leaderboard
 from scripts.deploy_contract import *
+import time
 
 def test_create():
     deploy_leaderboard()
@@ -157,13 +158,38 @@ def test_nickname():
     assert (nickname.startswith("1234567890123456"))
 
 
-def test_size_limit():
-    # TODO
-    pass
+def test_reset_timestamp():
+    id = create_leaderboard()
 
+    currentTimestamp = int( time.time() )
 
-def test_seconds_remaining():
-    # TODO
-    pass
+    ONE_DAY = 60 * 60 * 24
+    ONE_WEEK = ONE_DAY * 7
+    ONE_MONTH = ONE_DAY * 30
+    ONE_YEAR = ONE_DAY * 365
 
+    seconds = get_reset_timestamp(id)
+    assert (seconds == 0)
+
+    set_reset_period(id, 4)
+
+    seconds = get_reset_timestamp(id)
+    assert (get_reset_period(id) == 4)
+    assert (seconds == ONE_DAY)
+    
+    submit_score(id, get_account(), 5)
+    seconds = get_reset_timestamp(id)
+    assert (seconds >= currentTimestamp + ONE_DAY and seconds <= currentTimestamp + ONE_DAY + 2)
+
+    set_reset_period(id, 3)
+    seconds = get_reset_timestamp(id)
+    assert (seconds >= currentTimestamp + ONE_WEEK and seconds <= currentTimestamp + ONE_WEEK + 2)
+
+    set_reset_period(id, 2)
+    seconds = get_reset_timestamp(id)
+    assert (seconds >= currentTimestamp + ONE_MONTH and seconds <= currentTimestamp + ONE_MONTH + 2)
+
+    set_reset_period(id, 1)
+    seconds = get_reset_timestamp(id)
+    assert (seconds >= currentTimestamp + ONE_YEAR and seconds <= currentTimestamp + ONE_YEAR + 2)
 

@@ -50,8 +50,8 @@ interface ILeaderboard
     // Submits a new score for a player. Restricted to caller of createLeaderboard()
     function submitScore(uint256 leaderboardId, address player, uint256 newScore) external;
 
-    // Returns the amount of time, in seconds, until the leaderboard auto-clears. In case of 'Eternal' returns zero
-    function getResetSecondsRemaining(uint256 leaderboardId) external view returns(int256);
+    // Returns the timestamp when the leaderboard will auto-clear, in seconds since unix epoch. In case of 'Eternal' returns zero
+    function getResetTimestamp(uint256 leaderboardId) external view returns(uint256);
 
     // Allows a player to register their nickname with all leaderboards created with the contract. Player addresses are anonymized
     function registerNickname(string memory nickname) external;

@@ -1,7 +1,6 @@
 
 from brownie import Leaderboard, config, network
 from scripts.util import get_account
-import time
 
 
 def deploy_leaderboard():
@@ -125,12 +124,12 @@ def submit_score(_leaderboard_id, player_address, new_score):
     tx.wait(1)
 
 
-def get_reset_seconds_remaining(_leaderboard_id):
-    print("Get Reset Seconds Remaining")
+def get_reset_timestamp(_leaderboard_id):
+    print("Get Reset Timestamp")
     account = get_account()
     contract = Leaderboard[-1]
-    seconds = contract.getResetSecondsRemaining(_leaderboard_id, {"from": account})
-    print(str(seconds) + " seconds remaining until reset.")
+    seconds = contract.getResetTimestamp(_leaderboard_id, {"from": account})
+    print("Will reset at " + str(seconds) + " seconds from unix epoch.")
     return seconds
 
 

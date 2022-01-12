@@ -327,7 +327,7 @@ contract Leaderboard
     /**
      * 
      */
-    function getResetSecondsRemaining(uint256 leaderboardId) public view returns(int256)
+    function getResetTimestamp(uint256 leaderboardId) public view returns(uint256)
     {
         LeaderboardData storage board = leaderboards[leaderboardId];
 
@@ -335,7 +335,6 @@ contract Leaderboard
         {
             return 0;
         }
-        uint256 currentTime = block.timestamp;
         uint256 expireTime = board.firstTimestamp;
         
         if (board.resetPeriod == ResetPeriod.Daily)
@@ -354,11 +353,7 @@ contract Leaderboard
         {
             expireTime += 60 * 60 * 24 * 365; // 1 year
         }
-        if (currentTime > expireTime)
-        {
-            return -int256(currentTime - expireTime);
-        }
-        return int256(expireTime - currentTime);
+        return expireTime;
     }
 
     /**
@@ -462,6 +457,6 @@ contract Leaderboard
         {
             return false;
         }
-        return getResetSecondsRemaining(leaderboardId) == 0;
+        return getResetTimestamp(leaderboardId) >= block.timestamp;
     }
 }
