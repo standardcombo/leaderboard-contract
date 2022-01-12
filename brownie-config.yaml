@@ -67,6 +67,7 @@ networks:
     eth_usd_price_feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419'
   kovan:
     verify_source_code: True
+    leaderboard: '0xC1888E59b4b7dF8c917aDCD75cC59fbCC3E8cC48'
     vrf_coordinator: '0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9'
     link_token: '0xa36085F69e2889c224210F603D836748e7dC0088'
     keyhash: '0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4'
@@ -83,6 +84,9 @@ networks:
     oracle: '0x7AFe1118Ea78C1eae84ca8feE5C65Bc76CcF879e'
     jobId: '6d1bfe27e7034b1d87b5270556b17277'
     eth_usd_price_feed: '0x8A753747A1Fa494EC906cE90E9f37563A8AF630e'
+  ropsten:
+    verify_source_code: True
+    leaderboard: '0xcb3E3a945039c8dEc82AD16f127755e0BEC68e65'
   mumbai: # matic testnet
     verify_source_code: True
     vrf_coordinator: '0x8C7382F9D8f56b33781fE506E897a4F1e2d17255'
