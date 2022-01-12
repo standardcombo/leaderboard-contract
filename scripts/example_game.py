@@ -1,5 +1,5 @@
 
-from brownie import ExampleGame, Leaderboard
+from brownie import ExampleGame, Leaderboard, config, network
 from brownie.network import contract
 from scripts.util import get_account
 from scripts.deploy_contract import *
@@ -9,11 +9,25 @@ import time
 def deploy_game():
     print("Deploying Example Game")
     account = get_account()
-    deploy_leaderboard()
-    leaderboardAddress = Leaderboard[-1]
-    ExampleGame.deploy(leaderboardAddress, {"from": account})
+    ExampleGame.deploy({"from": account})
     
 
+def setup_leaderboard():
+    print("Setup Leaderboard")
+    networkConfig = config["networks"][network.show_active()]
+    #if (networkConfig["leaderboard"]):
+    #    leaderboardAddress = networkConfig["leaderboard"]
+    #else:
+    #    deploy_leaderboard()
+    #    leaderboardAddress = Leaderboard[-1]
+    leaderboardAddress = networkConfig["leaderboard"]
+
+    account = get_account()
+    contract = ExampleGame[-1]
+    tx = contract.setup(leaderboardAddress, {"from": account})
+    tx.wait(1)
+
+        
 def earn_points():
     print("Earning Points")
     account = get_account()
@@ -42,6 +56,7 @@ def get_leaderboard():
 
 def main():
     deploy_game()
-    earn_points()
-    register_nickname()
-    get_leaderboard()
+    setup_leaderboard()
+    #earn_points()
+    #register_nickname()
+    #get_leaderboard()
