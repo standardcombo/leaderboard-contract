@@ -416,14 +416,16 @@ contract Leaderboard
     function _getPlayerIdAbbreviation(bytes32 playerId) internal pure returns(string memory)
     {
         bytes memory alphabet = "0123456789abcdef";
-        bytes memory str = new bytes(6);
-        str[0] = "0";
-        str[1] = "x";
-        uint n = 2;
-        for (uint i = 0; n < str.length; i++) {
+        bytes memory str = new bytes(5);
+        str[0] = "#";
+        uint n = 1;
+        uint i = 0;
+        while (n < str.length)
+        {
             str[n] = alphabet[uint(uint8(playerId[i] >> 4))];
             str[n+1] = alphabet[uint(uint8(playerId[i] & 0x0f))];
             n += 2;
+            i++;
         }
         return string(str);
     }
