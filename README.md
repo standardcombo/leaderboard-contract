@@ -1,6 +1,6 @@
 # Leaderboard - smart contract
 
-This project spawned from the idea that nobody in the multiverse should ever have to create or deploy a leaderboard-- just call this one with minimal integration. Additionally, it serves as a powerful example of decentralization and composition, two hallmaks of blockchain technology.
+This project spawned from the idea that nobody in the multiverse should ever have to create or deploy a leaderboard-- just call this one with minimal integration. Additionally, it exemplifies the power of decentralization and composition, two hallmaks of blockchain technology.
 
 The Leaderboard contract achieves this goal by combining the principle of multi-tenant software with on-chain composition. There are no fees or tokens, only gas. This leaderboard is intended to be deployed only once per network, thereafter called by any number of games/applications who desire the service.
 
