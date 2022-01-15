@@ -162,6 +162,17 @@ def test_nickname():
     assert (nickname.startswith("1234567890123456"))
 
 
+def test_list_of_leaderboards():
+    leaderboard_ids = get_leaderboards_for_player(get_account())
+    assert (len(leaderboard_ids) == 2)
+    assert (leaderboard_ids[0] == 2 and leaderboard_ids[1] == 5)
+
+    id = create_leaderboard()
+    submit_score(id, get_account(), 10)
+    leaderboard_ids = get_leaderboards_for_player(get_account())
+    assert (len(leaderboard_ids) == 3 and leaderboard_ids[2] == id)
+
+
 def test_reset_timestamp():
     id = create_leaderboard()
 

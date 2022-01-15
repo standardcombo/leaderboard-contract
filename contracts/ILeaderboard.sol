@@ -56,6 +56,9 @@ interface ILeaderboard
     // Submits a new score for a player. Restricted to caller of createLeaderboard().
     function submitScore(uint256 leaderboardId, address player, uint256 newScore) external;
 
+    // Returns a list of leaderboard IDs in which the local player has any scores.
+    function getLeaderboardsForPlayer() external view returns(uint256[] memory);
+
     // Returns the timestamp when the leaderboard will auto-clear, in seconds since unix epoch. In case of 'Eternal' returns zero.
     function getResetTimestamp(uint256 leaderboardId) external view returns(uint256);
 

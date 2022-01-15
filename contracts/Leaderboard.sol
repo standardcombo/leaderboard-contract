@@ -36,6 +36,8 @@ contract Leaderboard
     // A value of 0 means the player does not have a score on that leaderboard
     mapping(uint256 => mapping(bytes32 => uint256)) playerIndexOneBased;
 
+    mapping(bytes32 => uint256[]) participatingLeaderboardsPerPlayer;
+
     /**
      * @dev Creates a brand-new leaderboard. The address that calls this is set as the owner of the new leaderboard.
      * 
@@ -192,11 +194,7 @@ contract Leaderboard
 
         while (board.scores.length > _maxSize)
         {
-            bytes32 lastPlayerId = board.players[board.scores.length - 1];
-            playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
-            board.players.pop();
-            board.scores.pop();
-            board.nicknames.pop();
+            _removeBottomEntry(leaderboardId);
         }
     }
 
@@ -284,6 +282,8 @@ contract Leaderboard
             board.scores.push(newScore);
             board.nicknames.push(_getNickname(playerId));
 
+            participatingLeaderboardsPerPlayer[playerId].push(leaderboardId);
+
             return;
         }
 
@@ -357,6 +357,8 @@ contract Leaderboard
                 board.scores.push(newScore);
                 board.nicknames.push(_getNickname(playerId));
                 playerIndexOneBased[leaderboardId][playerId] = board.scores.length;
+
+                participatingLeaderboardsPerPlayer[playerId].push(leaderboardId);
             }
             return;
         }
@@ -393,12 +395,25 @@ contract Leaderboard
                     break;
                 }
             }
+            participatingLeaderboardsPerPlayer[playerId].push(leaderboardId);
         }
         // Emplace
         playerIndexOneBased[leaderboardId][playerId] = playerIndex + 1;
         board.players[playerIndex] = playerId;
         board.scores[playerIndex] = newScore;
         board.nicknames[playerIndex] = _getNickname(playerId);
+    }
+
+    /**
+     * @dev Returns a list of leaderboard IDs in which the local player has any scores.
+     * Local only: The contract uses `msg.sender` to search.
+     * 
+     * @return unit256[] an array with leaderboard IDs.
+     */
+    function getLeaderboardsForPlayer() external view returns(uint256[] memory)
+    {
+        bytes32 playerId = _getPlayerId(msg.sender);
+        return participatingLeaderboardsPerPlayer[playerId];
     }
 
     /**
@@ -464,8 +479,10 @@ contract Leaderboard
         playerNicknames[playerId] = _nickname;
 
         // Update existing entries for this player across all leaderboards
-        for (uint256 id = 0; id < nextLeaderboardId; id++)
+        uint256[] memory leaderboardList = participatingLeaderboardsPerPlayer[playerId];
+        for (uint256 i = 0; i < leaderboardList.length; i++)
         {
+            uint256 id = leaderboardList[i];
             uint256 playerIndex = playerIndexOneBased[id][playerId];
             if (playerIndex > 0)
             {
@@ -520,11 +537,36 @@ contract Leaderboard
 
         while (board.scores.length > 0)
         {
-            bytes32 lastPlayerId = board.players[board.scores.length - 1];
-            playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
-            board.players.pop();
-            board.scores.pop();
-            board.nicknames.pop();
+            _removeBottomEntry(leaderboardId);
+        }
+    }
+
+    function _removeBottomEntry(uint256 leaderboardId) internal
+    {
+        LeaderboardData storage board = leaderboards[leaderboardId];
+
+        bytes32 lastPlayerId = board.players[board.scores.length - 1];
+        playerIndexOneBased[leaderboardId][lastPlayerId] = 0;
+        board.players.pop();
+        board.scores.pop();
+        board.nicknames.pop();
+
+        uint256[] storage leaderboardList = participatingLeaderboardsPerPlayer[lastPlayerId];
+        bool found;
+        for (uint256 i = 0; i < leaderboardList.length; i++)
+        {
+            if ( !found && leaderboardList[i] == leaderboardId)
+            {
+                found = true;
+            }
+            if (found && (i + 1) < leaderboardList.length)
+            {
+                leaderboardList[i] = leaderboardList[i + 1];
+            }
+        }
+        if (found)
+        {
+            leaderboardList.pop();
         }
     }
 

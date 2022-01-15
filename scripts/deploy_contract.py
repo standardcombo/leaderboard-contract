@@ -140,6 +140,14 @@ def submit_score(_leaderboard_id, player_address, new_score):
     tx.wait(1)
 
 
+def get_leaderboards_for_player(player):
+    print("Getting all leaderboards for a player")
+    contract = Leaderboard[-1]
+    leaderboard_ids = contract.getLeaderboardsForPlayer({"from": player})
+    print(leaderboard_ids)
+    return leaderboard_ids
+
+
 def get_reset_timestamp(_leaderboard_id):
     print("Get Reset Timestamp")
     account = get_account()
