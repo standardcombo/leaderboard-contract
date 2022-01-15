@@ -14,6 +14,10 @@ def test_create():
 def test_configure():
     id = create_leaderboard()
 
+    assert (get_leaderboard_name(id) == "")
+    set_leaderboard_name(id, "Loot Game")
+    assert (get_leaderboard_name(id) == "Loot Game")
+
     assert (get_reset_period(id) == 0)
     set_reset_period(id, 2)
     assert (get_reset_period(id) == 2)

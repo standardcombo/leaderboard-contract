@@ -23,16 +23,22 @@ interface ILeaderboard
     // Clears a leaderboard. Restricted to caller of createLeaderboard().
     function clearLeaderboard(uint256 leaderboardId) external;
 
+    // Returns the name of the leaderboard, if any.
+    function getName(uint256 leaderboardId) external view returns(string memory);
+
+    // Set a new name for the leaderboard. Restricted to caller of createLeaderboard().
+    function setName(uint256 leaderboardId, string memory name) external;
+
     // Returns the frequency at which the leaderboard auto-clears. Default is 'Eternal'.
     function getResetPeriod(uint256 leaderboardId) external view returns(ResetPeriod);
 
-    // Set the frequency at which the leaderboard auto-clears.
+    // Set the frequency at which the leaderboard auto-clears. Restricted to caller of createLeaderboard().
     function setResetPeriod(uint256 leaderboardId, ResetPeriod resetPeriod) external;
 
     // Returns the leaderboard's 'canScoresDecrease' property.
     function getCanScoresDecrease(uint256 leaderboardId) external view returns(bool);
 
-    // If set to True, then a new player's score replaces their previous score, even if it's a worse score. Default is False.
+    // If set to True, then a new player's score replaces their previous score, even if it's a worse score. Default is False. Restricted to caller of createLeaderboard().
     function setCanScoresDecrease(uint256 leaderboardId, bool canScoresDecrease) external;
 
     // Returns the maximum number of entries for a given leaderboard.

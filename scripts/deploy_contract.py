@@ -44,6 +44,23 @@ def clear_leaderboard(_leaderboard_id):
     tx.wait(1)
 
 
+def get_leaderboard_name(_leaderboard_id):
+    print("Get Leaderboard Name")
+    account = get_account()
+    contract = Leaderboard[-1]
+    leaderboardName = contract.getName(_leaderboard_id, {"from": account})
+    print("Current name = " + str(leaderboardName))
+    return leaderboardName
+
+
+def set_leaderboard_name(_leaderboard_id, new_name):
+    print("Set Leaderboard Name")
+    account = get_account()
+    contract = Leaderboard[-1]
+    tx = contract.setName(_leaderboard_id, new_name, {"from": account})
+    tx.wait(1)
+
+
 def get_reset_period(_leaderboard_id):
     print("Get Reset Period")
     account = get_account()

@@ -17,6 +17,7 @@ contract Leaderboard
 
     struct LeaderboardData
     {
+        string name;
         ResetPeriod resetPeriod;
         bool canScoresDecrease;
         uint256 maxSize;
@@ -77,6 +78,33 @@ contract Leaderboard
     {
         _checkAuthority(leaderboardId);
         _clearLeaderboard(leaderboardId);
+    }
+
+    /**
+     * @dev Returns a specific leaderboard's name, if any.
+     * 
+     * @param leaderboardId number of the leaderboard to be inspected.
+     * 
+     * @return string the leaderboard's display name.
+     */
+    function getName(uint256 leaderboardId) public view returns(string memory)
+    {
+        LeaderboardData memory board = leaderboards[leaderboardId];
+        return board.name;
+    }
+
+    /**
+     * @dev Set a new name for a specific leaderboard.
+     * 
+     * @param leaderboardId number of the leaderboard to be configured.
+     * @param _name the leaderboard's new display name.
+     */
+    function setName(uint256 leaderboardId, string memory _name) public
+    {
+        _checkAuthority(leaderboardId);
+
+        LeaderboardData storage board = leaderboards[leaderboardId];
+        board.name = _name;
     }
 
     /**
